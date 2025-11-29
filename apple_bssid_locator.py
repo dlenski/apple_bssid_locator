@@ -26,10 +26,11 @@ def process_result(apple_wloc):
 	device_locations = {}
 	for wifi_device in apple_wloc.wifi_devices:
 		if wifi_device.HasField('location'):
-			lat = wifi_device.location.latitude * 1e-8
-			lon = wifi_device.location.longitude * 1e-8
-			mac = format_bssid(wifi_device.bssid)
-			device_locations[mac] = (lat,lon)
+			if wifi_device.location.latitude != -18_000_000_000 or wifi_device.location.longitude != -18_000_000_000:
+				lat = wifi_device.location.latitude * 1e-8
+				lon = wifi_device.location.longitude * 1e-8
+				mac = format_bssid(wifi_device.bssid)
+				device_locations[mac] = (lat,lon)
 	return device_locations
 
 def query_bssid(bssid):
@@ -61,8 +62,6 @@ def main():
 	for bssid in bssids_to_process:
 		if bssid in results:
 			lat, lon = results[bssid]
-			if lat == -180.0 and lon == -180.0:
-				continue  # Skip entries that were not found
 			lat_str = str(lat)
 			lon_str = str(lon)
 			if found: print()
