@@ -66,21 +66,15 @@ def main():
 	print("Searching for location of bssid: %s" % args.bssid)
 	results = query_bssid(args.bssid)
 
-	# Determine which BSSIDs to process
-	bssids_to_process = results.keys() if args.all else [args.bssid.lower()]
-
 	found = False
-	for bssid in bssids_to_process:
-		if bssid in results:
-			lat, lon = results[bssid]
-			lat_str = str(lat)
-			lon_str = str(lon)
-			if found: print()
+	for bssid, (lat, lon) in results.items():
+		if bssid == args.bssid.lower() or args.all:
+			print()
 			print(f"BSSID: {bssid}")
-			print(f"Latitude: {lat_str}")
-			print(f"Longitude: {lon_str}")
+			print(f"Latitude: {lat}")
+			print(f"Longitude: {lon}")
 			if args.map:
-				url = f"http://www.google.com/maps/place/{lat_str},{lon_str}"
+				url = f"http://www.google.com/maps/place/{lat},{lon}"
 				webbrowser.open(url)
 			found = True
 
