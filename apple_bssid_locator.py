@@ -5,8 +5,6 @@
 # Usage: apple_bssid_locator.py 34:DB:FD:43:E3:A1 --map
 
 import argparse
-import sys
-import code
 import requests
 import webbrowser
 import AppleWLoc_pb2
@@ -29,12 +27,15 @@ def process_result(apple_wloc):
 			if wifi_device.location.latitude != -18_000_000_000 or wifi_device.location.longitude != -18_000_000_000:
 				lat = wifi_device.location.latitude * 1e-8
 				lon = wifi_device.location.longitude * 1e-8
+				hacc = wifi_device.location.horizontal_accuracy
+				alt = wifi_device.location.altitude
+				vacc = wifi_device.location.vertical_accuracy
 				mac = format_bssid(wifi_device.bssid)
-				device_locations[mac] = (lat,lon)
+				device_locations[mac] = (lat,lon,hacc,alt,vacc)
 	return device_locations
 
 def query_bssid(bssid):
-	apple_wloc = AppleWLoc_pb2.AppleWLoc(unknown_value1=0, return_single_result=1,
+	apple_wloc = AppleWLoc_pb2.AppleWLoc(num_wifi_results=1,
 		wifi_devices=[AppleWLoc_pb2.WifiDevice(bssid = bssid)])
 	serialized_apple_wloc = apple_wloc.SerializeToString()
 
@@ -67,12 +68,15 @@ def main():
 	results = query_bssid(args.bssid)
 
 	found = False
-	for bssid, (lat, lon) in results.items():
+	for bssid, (lat, lon, hacc, alt, vacc) in results.items():
 		if bssid == args.bssid.lower() or args.all:
 			print()
 			print(f"BSSID: {bssid}")
 			print(f"Latitude: {lat}")
 			print(f"Longitude: {lon}")
+			print(f"Altitude: {alt} m")
+			print(f"Horizontal accuracy: {hacc} m")
+			print(f"Vertical accuracy: {vacc} m")
 			if args.map:
 				url = f"http://www.google.com/maps/place/{lat},{lon}"
 				webbrowser.open(url)
