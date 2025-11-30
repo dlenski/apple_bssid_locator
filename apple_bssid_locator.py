@@ -55,7 +55,7 @@ def query_bssid(bssid):
 		(1).to_bytes(4, 'big') +
 		len(serialized_apple_wloc).to_bytes(4, 'big') + serialized_apple_wloc
 	)
-	r = requests.post('https://gs-loc.apple.com/clls/wloc', headers=headers, data=data, verify=False) # CN of cert on this hostname is sometimes *.ls.apple.com / ls.apple.com, so have to disable SSL verify
+	r = requests.post('https://gs-loc.apple.com/clls/wloc', headers=headers, data=data)
 	assert r.content[:6] == (1).to_bytes(2, 'big') + (1).to_bytes(4, 'big'), "Pre-protobuf header in response is not what we expected"
 	assert r.content[6:10] == (len(r.content) - 10).to_bytes(4, 'big'), "Pre-protobuf length field in response does not match expected length"
 	apple_wloc = AppleWLoc_pb2.AppleWLoc.FromString(r.content[10:])
